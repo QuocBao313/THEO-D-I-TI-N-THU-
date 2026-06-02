@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Quản Lý Hợp Đồng Thuê Mặt Bằng</title>
+  <meta name="description" content="Dashboard phân tích hợp đồng thuê mặt bằng chi nhánh – tổng quan trạng thái, vùng, loại hình và thanh toán." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="brand-icon">🏢</div>
+        <div>
+          <div class="brand-title">HMK Real Estate</div>
+          <div class="brand-sub">Dashboard Quản Lý Hợp Đồng Thuê Mặt Bằng</div>
+        </div>
+      </div>
+      <div class="header-meta">
+        <div class="update-badge">
+          <span class="pulse-dot"></span>
+          Cập nhật: <span id="updateTime"></span>
+        </div>
+        <!-- Filter bar -->
+        <div class="filter-bar">
+          <select id="filterLoaiHinh" class="filter-select">
+            <option value="all">Tất cả Loại Hình</option>
+          </select>
+          <select id="filterVung" class="filter-select">
+            <option value="all">Tất cả Vùng</option>
+          </select>
+          <select id="filterTrangThai" class="filter-select">
+            <option value="all">Tất cả Trạng Thái</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- KPI Cards -->
+    <section class="kpi-grid" id="kpiGrid"></section>
+
+    <!-- Row 1: Donut + Bar -->
+    <div class="charts-row">
+      <div class="chart-card chart-card--md">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">🏷️</span> Phân bổ theo Loại Hình
+          </div>
+        </div>
+        <div class="chart-wrap chart-wrap--donut">
+          <canvas id="chartLoaiHinh"></canvas>
+          <div class="donut-legend" id="donutLegend"></div>
+        </div>
+      </div>
+
+      <div class="chart-card chart-card--lg">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">📍</span> Chi Nhánh theo Vùng Địa Lý
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chartVung"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Trạng thái thanh toán + Trạng thái hợp đồng -->
+    <div class="charts-row">
+      <div class="chart-card chart-card--md">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">💳</span> Tình Trạng Thanh Toán
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chartThanhToan"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card chart-card--lg">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">📋</span> Trạng Thái Hợp Đồng
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chartTrangThai"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Tổng tiền theo vùng + Phân bổ kỳ thanh toán -->
+    <div class="charts-row">
+      <div class="chart-card chart-card--lg">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">💰</span> Tổng Tiền Thuê theo Vùng (triệu đồng)
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chartTienThueVung"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card chart-card--md">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">🗓️</span> Phân Bổ Kỳ Thanh Toán (tháng)
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chartKyThanhToan"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 4: Heatmap vùng x loại hình + Sắp đến hạn -->
+    <div class="charts-row">
+      <div class="chart-card chart-card--full">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">🔥</span> Phân Bổ Chi Nhánh: Vùng × Loại Hình
+          </div>
+        </div>
+        <div class="heatmap-wrap" id="heatmapWrap"></div>
+      </div>
+    </div>
+
+    <!-- Row 5: Bảng chi tiết -->
+    <div class="charts-row">
+      <div class="chart-card chart-card--full">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">📊</span> Chi Tiết Hợp Đồng
+          </div>
+          <div class="table-search-wrap">
+            <input type="text" id="tableSearch" class="table-search" placeholder="🔍 Tìm theo tên chi nhánh..." />
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="detailTable">
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Chi Nhánh</th>
+                <th>Loại Hình</th>
+                <th>Vùng</th>
+                <th>Tiền/Kỳ</th>
+                <th>Kỳ TT (tháng)</th>
+                <th>Ngày Bắt Đầu</th>
+                <th>Ngày Đến Hạn Kỳ</th>
+                <th>Trạng Thái HĐ</th>
+                <th>Tình Trạng TT</th>
+              </tr>
+            </thead>
+            <tbody id="detailTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <span>HMK Real Estate © 2026 · Dashboard Hợp Đồng Thuê Mặt Bằng</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
